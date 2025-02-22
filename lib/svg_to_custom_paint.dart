@@ -68,7 +68,8 @@ class PistonPainter extends CustomPainter {
     canvas.drawRect(cylinderRect, paint);
 
     // Calculate the crankshaft journal center and radius
-    final crankshaftJournalCenter = Offset(size.width * 0.5, size.height * 0.8);
+    final crankshaftJournalCenter =
+        Offset(size.width * 0.5, size.height * 0.85 + 50);
     final crankshaftJournalRadius = cylinderHeight / 2;
 
     // Calculate the position of the yellow pin on the edge of the crankshaft journal
@@ -87,15 +88,6 @@ class PistonPainter extends CustomPainter {
         size.width * 0.3, pistonPosition, size.width * 0.4, size.height * 0.2);
     paint.color = Colors.red;
     canvas.drawRect(pistonHeadRect, paint);
-
-    // Draw the piston rod
-    final pistonRodRect = Rect.fromLTWH(
-        size.width * 0.45,
-        pistonPosition + size.height * 0.2,
-        size.width * 0.1,
-        yellowPinY - (pistonPosition + size.height * 0.2));
-    paint.color = Colors.blue;
-    canvas.drawRect(pistonRodRect, paint);
 
     // Draw the crankshaft journal as a green circle
     paint.color = Colors.green;
