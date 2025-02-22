@@ -83,13 +83,17 @@ class PistonPainter extends CustomPainter {
     canvas.drawRect(pistonRodRect, paint);
 
     // Draw the piston pin
-    final pistonPinRect = Rect.fromLTWH(size.width * 0.35, size.height * 0.8,
-        size.width * 0.3, size.height * 0.05);
+    final pistonPinRect = Rect.fromLTWH(
+        size.width * 0.35,
+        size.height * (pistonPosition + 0.7),
+        size.width * 0.3,
+        size.height * 0.05);
     paint.color = Colors.green;
     canvas.drawRect(pistonPinRect, paint);
 
     // Draw the piston pin hole
-    final pistonPinHole = Offset(size.width * 0.5, size.height * 0.825);
+    final pistonPinHole =
+        Offset(size.width * 0.5, size.height * (pistonPosition + 0.725));
     final pistonPinHoleRadius = size.height * 0.025;
     paint.color = Colors.yellow;
     canvas.drawCircle(pistonPinHole, pistonPinHoleRadius, paint);
