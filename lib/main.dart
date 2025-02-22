@@ -12,9 +12,6 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('SVG to CustomPaint Example'),
-        ),
         body: Center(
           child: SvgToCustomPaintExample(),
         ),

@@ -33,9 +33,6 @@ class _SvgToCustomPaintExampleState extends State<SvgToCustomPaintExample>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('CustomPaint Example'),
-      ),
       body: Center(
         child: AnimatedBuilder(
           animation: _animation,
@@ -63,8 +60,9 @@ class PistonPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     // Draw the cylinder (covering upper part and half of the rod)
+    final cylinderHeight = size.height * 0.55;
     final cylinderRect = Rect.fromLTWH(size.width * 0.25, size.height * 0.05,
-        size.width * 0.5, size.height * 0.55);
+        size.width * 0.5, cylinderHeight);
     canvas.drawRect(cylinderRect, paint);
 
     // Draw the piston head
@@ -82,21 +80,28 @@ class PistonPainter extends CustomPainter {
     paint.color = Colors.blue;
     canvas.drawRect(pistonRodRect, paint);
 
-    // Draw the piston pin
-    final pistonPinRect = Rect.fromLTWH(
-        size.width * 0.35,
-        size.height * (pistonPosition + 0.7),
-        size.width * 0.3,
-        size.height * 0.05);
+    // Draw the crankshaft journal as a green circle with the same diameter as the cylinder's height
+    final crankshaftJournalCenter =
+        Offset(size.width * 0.5, size.height * (pistonPosition + 0.7));
+    final crankshaftJournalRadius =
+        cylinderHeight / 2; // Same diameter as the cylinder's height
     paint.color = Colors.green;
-    canvas.drawRect(pistonPinRect, paint);
+    canvas.drawCircle(crankshaftJournalCenter, crankshaftJournalRadius, paint);
 
-    // Draw the piston pin hole
-    final pistonPinHole =
-        Offset(size.width * 0.5, size.height * (pistonPosition + 0.725));
-    final pistonPinHoleRadius = size.height * 0.025;
+    // Draw the crankshaft journal hole
+    final crankshaftJournalHole =
+        Offset(size.width * 0.5, size.height * (pistonPosition + 0.7));
+    final crankshaftJournalHoleRadius = size.height * 0.025;
     paint.color = Colors.yellow;
-    canvas.drawCircle(pistonPinHole, pistonPinHoleRadius, paint);
+    canvas.drawCircle(
+        crankshaftJournalHole, crankshaftJournalHoleRadius, paint);
+
+    // Draw the round pin going through the piston and rod
+    final pinCenter =
+        Offset(size.width * 0.5, size.height * (pistonPosition + 0.1));
+    final pinRadius = size.width * 0.03;
+    paint.color = Colors.black;
+    canvas.drawCircle(pinCenter, pinRadius, paint);
   }
 
   @override
