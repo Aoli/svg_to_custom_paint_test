@@ -1,50 +1,49 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter/services.dart';
-import 'package:logging/logging.dart';
 
 class SvgToCustomPaintExample extends StatefulWidget {
   const SvgToCustomPaintExample({super.key});
 
   @override
-  State<SvgToCustomPaintExample> createState() =>
+  _SvgToCustomPaintExampleState createState() =>
       _SvgToCustomPaintExampleState();
 }
 
-class _SvgToCustomPaintExampleState extends State<SvgToCustomPaintExample> {
-  late Future<PictureInfo> svgPicture;
+class _SvgToCustomPaintExampleState extends State<SvgToCustomPaintExample>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
 
   @override
   void initState() {
     super.initState();
-    svgPicture = _loadSVG();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _animation = Tween<double>(begin: 0.1, end: 0.4).animate(_controller);
   }
 
-  Future<PictureInfo> _loadSVG() async {
-    final String svgString =
-        await rootBundle.loadString('lib/assets/images/piston.svg');
-    final PictureInfo pictureInfo =
-        await vg.loadPicture(SvgStringLoader(svgString), null);
-    return pictureInfo;
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('SVG to CustomPaint'),
+        title: const Text('CustomPaint Example'),
       ),
       body: Center(
-        child: FutureBuilder<PictureInfo>(
-          future: svgPicture,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return CustomPaint(
-                size: const Size(400, 400),
-                painter: SVGPainter(snapshot.data!),
-              );
-            }
-            return const CircularProgressIndicator();
+        child: AnimatedBuilder(
+          animation: _animation,
+          builder: (context, child) {
+            return CustomPaint(
+              size: const Size(400, 400),
+              painter: PistonPainter(_animation.value),
+            );
           },
         ),
       ),
@@ -52,18 +51,48 @@ class _SvgToCustomPaintExampleState extends State<SvgToCustomPaintExample> {
   }
 }
 
-class SVGPainter extends CustomPainter {
-  final PictureInfo pictureInfo;
+class PistonPainter extends CustomPainter {
+  final double pistonPosition;
 
-  SVGPainter(this.pictureInfo);
+  PistonPainter(this.pistonPosition);
 
   @override
   void paint(Canvas canvas, Size size) {
-    canvas.save();
-    final ratio = size.width / pictureInfo.size.width;
-    canvas.scale(ratio);
-    canvas.drawPicture(pictureInfo.picture);
-    canvas.restore();
+    final paint = Paint()
+      ..color = Colors.grey
+      ..style = PaintingStyle.fill;
+
+    // Draw the cylinder (covering upper part and half of the rod)
+    final cylinderRect = Rect.fromLTWH(size.width * 0.25, size.height * 0.05,
+        size.width * 0.5, size.height * 0.55);
+    canvas.drawRect(cylinderRect, paint);
+
+    // Draw the piston head
+    final pistonHeadRect = Rect.fromLTWH(size.width * 0.3,
+        size.height * pistonPosition, size.width * 0.4, size.height * 0.2);
+    paint.color = Colors.red;
+    canvas.drawRect(pistonHeadRect, paint);
+
+    // Draw the piston rod
+    final pistonRodRect = Rect.fromLTWH(
+        size.width * 0.45,
+        size.height * (pistonPosition + 0.2),
+        size.width * 0.1,
+        size.height * 0.5);
+    paint.color = Colors.blue;
+    canvas.drawRect(pistonRodRect, paint);
+
+    // Draw the piston pin
+    final pistonPinRect = Rect.fromLTWH(size.width * 0.35, size.height * 0.8,
+        size.width * 0.3, size.height * 0.05);
+    paint.color = Colors.green;
+    canvas.drawRect(pistonPinRect, paint);
+
+    // Draw the piston pin hole
+    final pistonPinHole = Offset(size.width * 0.5, size.height * 0.825);
+    final pistonPinHoleRadius = size.height * 0.025;
+    paint.color = Colors.yellow;
+    canvas.drawCircle(pistonPinHole, pistonPinHoleRadius, paint);
   }
 
   @override
