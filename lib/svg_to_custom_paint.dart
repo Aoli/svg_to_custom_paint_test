@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 
 class SvgToCustomPaintExample extends StatefulWidget {
   const SvgToCustomPaintExample({super.key});
@@ -19,9 +20,10 @@ class _SvgToCustomPaintExampleState extends State<SvgToCustomPaintExample>
     _controller = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
-    )..repeat(reverse: true);
+    )..repeat();
 
-    _animation = Tween<double>(begin: 0.1, end: 0.4).animate(_controller);
+    _animation =
+        Tween<double>(begin: 0.0, end: 2 * math.pi).animate(_controller);
   }
 
   @override
@@ -49,9 +51,9 @@ class _SvgToCustomPaintExampleState extends State<SvgToCustomPaintExample>
 }
 
 class PistonPainter extends CustomPainter {
-  final double pistonPosition;
+  final double rotation;
 
-  PistonPainter(this.pistonPosition);
+  PistonPainter(this.rotation);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -65,43 +67,62 @@ class PistonPainter extends CustomPainter {
         size.width * 0.5, cylinderHeight);
     canvas.drawRect(cylinderRect, paint);
 
+    // Calculate the crankshaft journal center and radius
+    final crankshaftJournalCenter = Offset(size.width * 0.5, size.height * 0.8);
+    final crankshaftJournalRadius = cylinderHeight / 2;
+
+    // Calculate the position of the yellow pin on the edge of the crankshaft journal
+    final yellowPinX = crankshaftJournalCenter.dx +
+        crankshaftJournalRadius * math.cos(rotation);
+    final yellowPinY = crankshaftJournalCenter.dy +
+        crankshaftJournalRadius * math.sin(rotation);
+    final yellowPinPosition = Offset(yellowPinX, yellowPinY);
+
+    // Calculate the piston position based on the yellow pin's vertical position
+    final pistonPosition = (yellowPinY - size.height * 0.2)
+        .clamp(size.height * 0.05, size.height * 0.35);
+
     // Draw the piston head
-    final pistonHeadRect = Rect.fromLTWH(size.width * 0.3,
-        size.height * pistonPosition, size.width * 0.4, size.height * 0.2);
+    final pistonHeadRect = Rect.fromLTWH(
+        size.width * 0.3, pistonPosition, size.width * 0.4, size.height * 0.2);
     paint.color = Colors.red;
     canvas.drawRect(pistonHeadRect, paint);
 
     // Draw the piston rod
     final pistonRodRect = Rect.fromLTWH(
         size.width * 0.45,
-        size.height * (pistonPosition + 0.2),
+        pistonPosition + size.height * 0.2,
         size.width * 0.1,
-        size.height * 0.5);
+        yellowPinY - (pistonPosition + size.height * 0.2));
     paint.color = Colors.blue;
     canvas.drawRect(pistonRodRect, paint);
 
-    // Draw the crankshaft journal as a green circle with the same diameter as the cylinder's height
-    final crankshaftJournalCenter =
-        Offset(size.width * 0.5, size.height * (pistonPosition + 0.7));
-    final crankshaftJournalRadius =
-        cylinderHeight / 2; // Same diameter as the cylinder's height
+    // Draw the crankshaft journal as a green circle
     paint.color = Colors.green;
     canvas.drawCircle(crankshaftJournalCenter, crankshaftJournalRadius, paint);
 
     // Draw the crankshaft journal hole
-    final crankshaftJournalHole =
-        Offset(size.width * 0.5, size.height * (pistonPosition + 0.7));
     final crankshaftJournalHoleRadius = size.height * 0.025;
     paint.color = Colors.yellow;
-    canvas.drawCircle(
-        crankshaftJournalHole, crankshaftJournalHoleRadius, paint);
+    canvas.drawCircle(yellowPinPosition, crankshaftJournalHoleRadius, paint);
 
     // Draw the round pin going through the piston and rod
     final pinCenter =
-        Offset(size.width * 0.5, size.height * (pistonPosition + 0.1));
+        Offset(size.width * 0.5, pistonPosition + size.height * 0.1);
     final pinRadius = size.width * 0.03;
     paint.color = Colors.black;
     canvas.drawCircle(pinCenter, pinRadius, paint);
+
+    // Draw the piston rod between the yellow pin and the black pin
+    final pistonRodPath = Path()
+      ..moveTo(size.width * 0.5, pistonPosition + size.height * 0.1)
+      ..lineTo(yellowPinX, yellowPinY)
+      ..lineTo(yellowPinX + size.width * 0.1, yellowPinY)
+      ..lineTo(size.width * 0.5 + size.width * 0.1,
+          pistonPosition + size.height * 0.1)
+      ..close();
+    paint.color = Colors.blue;
+    canvas.drawPath(pistonRodPath, paint);
   }
 
   @override
