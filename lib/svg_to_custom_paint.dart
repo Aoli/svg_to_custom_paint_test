@@ -132,8 +132,11 @@ class PistonPainter extends CustomPainter {
         size.height * 0.55 // Increased from 0.45 to match taller cylinder
         );
 
-    // Draw the crankshaft journal as a green circle
+    // Draw the crankshaft journal with cutout opposite to yellow pin
     paint.color = Colors.green;
+    paint.style = PaintingStyle.fill;
+
+    // Start with a simple green circle
     canvas.drawCircle(crankshaftJournalCenter, crankshaftJournalRadius, paint);
 
     // Draw a bolt in the middle of the crankshaft journal
@@ -159,8 +162,8 @@ class PistonPainter extends CustomPainter {
     canvas.restore();
 
     // Draw the round pin going through the piston
-    final pinCenter =
-        Offset(size.width * 0.5, pistonPosition + size.height * 0.1 + 30); // Moved down by 30
+    final pinCenter = Offset(size.width * 0.5,
+        pistonPosition + size.height * 0.1 + 20); // Moved down by 30
 
     // Draw the piston rod first (so it appears behind everything)
     final pistonRodPath = Path()
